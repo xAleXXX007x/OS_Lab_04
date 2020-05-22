@@ -8,6 +8,7 @@ namespace OS_Lab_4
 {
     public class Cluster
     {
+        public int Id;
         public Cluster Next;
     }
 }

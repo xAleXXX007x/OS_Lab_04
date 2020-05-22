@@ -10,6 +10,7 @@ namespace OS_Lab_4
     {
         public int Id;
         public string Name;
+        public Cluster Cluster;
 
         public AbstractFile()
         {

@@ -13,7 +13,7 @@ namespace OS_Lab_4
     public partial class FormMain : Form
     {
         public Dictionary<int, Cluster> disk;
-        public Dictionary<Cluster, AbstractFile> files;
+        public List<AbstractFile> files;
         public const int diskSize = 256;
         public int dirCount;
         public int fileCount;
@@ -28,6 +28,7 @@ namespace OS_Lab_4
             fileCount = 0;
 
             disk = new Dictionary<int, Cluster>();
+            files = new List<AbstractFile>();
 
             Directory root = new Directory("Корневая директория");
             root.Id = dirCount++;
@@ -143,10 +144,13 @@ namespace OS_Lab_4
                     return;
                 }
 
-                int size = rand.Next(1, 5);
+                int size = rand.Next(2, 5);
                 TreeNode newNode = selectedNode.Nodes.Add("Новый файл");
                 File newFile = new File("Новый файл", size);
                 newFile.Id = fileCount++;
+
+                files.Add(newFile);
+
                 newNode.Tag = newFile;
 
                 (selectedNode.Tag as Directory).Content.Add(newFile);
@@ -208,7 +212,11 @@ namespace OS_Lab_4
             foreach (int i in freeSpace)
             {
                 Cluster cluster = new Cluster();
-                files[cluster] = file;
+                cluster.Id = i;
+                if (file.Cluster == null)
+                {
+                    file.Cluster = cluster;
+                }
 
                 if (prevCluster != null)
                 {
@@ -223,7 +231,22 @@ namespace OS_Lab_4
 
         private AbstractFile FileFromCluster(Cluster cluster)
         {
-            return files[cluster];
+            foreach (AbstractFile file in files)
+            {
+                var fileCluster = file.Cluster;
+
+                while (fileCluster != null)
+                {
+                    if (fileCluster.Id == cluster.Id)
+                    {
+                        return file;
+                    }
+
+                    fileCluster = fileCluster.Next;
+                }
+            }
+
+            throw new Exception("Файл не найден");
         }
 
         private void treeView_AfterSelect(object sender, TreeViewEventArgs e)
@@ -266,11 +289,13 @@ namespace OS_Lab_4
                     }
                 }
 
+
                 foreach (var id in toRemove)
                 {
                     disk.Remove(id);
                 }
 
+                files.Remove(file);
                 treeView.Nodes.Remove(selectedNode);
 
                 Draw();
@@ -324,6 +349,9 @@ namespace OS_Lab_4
                     {
                         File newFile = new File((newNode.Tag as File).Name, (newNode.Tag as File).Size);
                         newFile.Id = fileCount++;
+
+                        files.Add(newFile);
+
                         newNode.Tag = newFile;
 
                         LocateFile(newNode.Tag as File);
@@ -337,6 +365,9 @@ namespace OS_Lab_4
                             File file = node.Tag as File;
                             File newFile = new File(file.Name, file.Size);
                             newFile.Id = fileCount++;
+
+                            files.Add(newFile);
+
                             node.Tag = newFile;
 
                             newDir.Content.Add(newFile);
