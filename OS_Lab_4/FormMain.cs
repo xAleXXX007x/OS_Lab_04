@@ -13,6 +13,7 @@ namespace OS_Lab_4
     public partial class FormMain : Form
     {
         public Dictionary<int, Cluster> disk;
+        public Dictionary<Cluster, AbstractFile> files;
         public const int diskSize = 256;
         public int dirCount;
         public int fileCount;
@@ -61,7 +62,7 @@ namespace OS_Lab_4
                         {
                             int id = (selectedNode.Tag as File).Id;
 
-                            if (disk.ContainsKey(index) && disk[index].File.Id.Equals(id))
+                            if (disk.ContainsKey(index) && FileFromCluster(disk[index]).Id.Equals(id))
                             {
                                 color = Color.Red;
                             }
@@ -69,7 +70,7 @@ namespace OS_Lab_4
                         {
                             List<int> list = GetDirectoryFileIds(selectedNode.Tag as Directory);
 
-                            if (disk.ContainsKey(index) && list.Contains(disk[index].File.Id))
+                            if (disk.ContainsKey(index) && list.Contains(FileFromCluster(disk[index]).Id))
                             {
                                 color = Color.Red;
                             }
@@ -207,7 +208,7 @@ namespace OS_Lab_4
             foreach (int i in freeSpace)
             {
                 Cluster cluster = new Cluster();
-                cluster.File = file;
+                files[cluster] = file;
 
                 if (prevCluster != null)
                 {
@@ -218,6 +219,11 @@ namespace OS_Lab_4
 
                 prevCluster = cluster;
             }
+        }
+
+        private AbstractFile FileFromCluster(Cluster cluster)
+        {
+            return files[cluster];
         }
 
         private void treeView_AfterSelect(object sender, TreeViewEventArgs e)
@@ -237,7 +243,7 @@ namespace OS_Lab_4
                 {
                     foreach (var cluster in disk)
                     {
-                        if (cluster.Value.File.Id.Equals(file.Id))
+                        if (FileFromCluster(cluster.Value).Id.Equals(file.Id))
                         {
                             toRemove.Add(cluster.Key);
                         }
@@ -253,7 +259,7 @@ namespace OS_Lab_4
 
                     foreach (var cluster in disk)
                     {
-                        if (diskFiles.Contains(cluster.Value.File.Id))
+                        if (diskFiles.Contains(FileFromCluster(cluster.Value).Id))
                         {
                             toRemove.Add(cluster.Key);
                         }

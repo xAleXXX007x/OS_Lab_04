@@ -8,8 +8,6 @@ namespace OS_Lab_4
 {
     public class Cluster
     {
-        public AbstractFile File;
-
         public Cluster Next;
     }
 }
